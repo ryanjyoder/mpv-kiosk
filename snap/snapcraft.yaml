@@ -1,0 +1,89 @@
+name: mpv-kiosk
+base: core18 
+version: '0.1' 
+summary: Loop videos on a kiosk
+description: |
+  Create a kiosk with this snap to loop a set of videos. 
+  This snap needs the mir-kiosk snap to run. To get started drop a some of videos into /var/snap/mpv-kiosk/common/. The snap will also search any external media for videos, if the interface is connected.
+
+grade: stable 
+confinement: strict
+
+environment:
+  SHELL: bash
+  LC_ALL: C.UTF-8
+  LD_LIBRARY_PATH: ${LD_LIBRARY_PATH}:${SNAP}/usr/lib/:${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/:/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/pulseaudio:/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/samba
+  PATH: $SNAP/bin/:$SNAP/usr/bin/:${PATH}
+  XDG_CACHE_HOME:  $SNAP_USER_COMMON/.cache
+  XDG_CONFIG_HOME: $SNAP_USER_DATA/.config
+  WINDOWING: wayland
+
+
+layout:
+  /etc/mpv:
+    bind: $SNAP_DATA/etc/mpv
+  /etc/glvnd:
+    bind: $SNAP/etc/glvnd
+  /etc/samba/smb.conf:
+    symlink: $SNAP/usr/share/samba/smb.conf
+  /usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri:
+    bind: $SNAP/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri
+  /usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/pulseaudio:
+    bind: $SNAP/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/pulseaudio
+  /usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/samba:
+    bind: $SNAP/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/samba
+  /usr/share/glvnd:
+    bind: $SNAP/usr/share/glvnd
+  /usr/share/samba:
+    bind: $SNAP/usr/share/samba
+  /usr/share/X11/xkb:
+    bind: $SNAP/usr/share/X11/xkb
+
+
+plugs:
+  wayland:
+  opengl:
+  audio-playback:
+  pulseaudio:
+  alsa:
+  mount-observe:
+  removable-media:
+
+   
+apps:
+  mpv:
+    command: run-daemon wayland-launch $SNAP/usr/bin/mpv --vo opengl $SNAP_COMMON/ $(ls /media/)
+    daemon: simple
+    restart-condition: always
+    environment:
+      PULSE_SYSTEM: 1
+      PULSE_RUNTIME_PATH: /var/run/pulse
+
+parts:
+  mpv:
+    plugin: nil
+    stage-packages:
+      - mpv
+      - libslang2
+      - freeglut3
+      - libglu1-mesa
+      - libxkbcommon-dev
+      - libass9
+      - samba-libs
+      - samba-common-bin
+      - samba-common
+      - libfstrcmp0
+      - libpulse0
+      - libsndio6.1
+      - libaudio2
+
+  mesa:
+    plugin: nil
+    stage-packages:
+      - libgl1-mesa-dri
+      - va-driver-all
+
+  mir-kiosk-snap-launch:
+    plugin: dump
+    source: https://github.com/MirServer/mir-kiosk-snap-launch.git
+    override-build:  $SNAPCRAFT_PART_BUILD/build-with-plugs.sh opengl pulseaudio wayland
