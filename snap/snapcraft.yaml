@@ -59,6 +59,13 @@ apps:
       PULSE_SYSTEM: 1
       PULSE_RUNTIME_PATH: /var/run/pulse
 
+  udisksd:
+        daemon: simple
+        command: usr/lib/udisks2/udisksd
+        plugs:
+            - hardware-observe
+            - mount-observe
+
 parts:
   mpv:
     plugin: nil
@@ -87,3 +94,7 @@ parts:
     plugin: dump
     source: https://github.com/MirServer/mir-kiosk-snap-launch.git
     override-build:  $SNAPCRAFT_PART_BUILD/build-with-plugs.sh opengl pulseaudio wayland
+  
+  udisks2:
+    plugin: nil
+    stage-packages: [udisks2]
