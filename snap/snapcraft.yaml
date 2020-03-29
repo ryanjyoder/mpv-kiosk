@@ -52,19 +52,12 @@ plugs:
    
 apps:
   mpv:
-    command: run-daemon wayland-launch $SNAP/usr/bin/mpv --vo opengl $SNAP_COMMON/ $(ls /media/)
+    command: run-daemon wayland-launch $SNAP/usr/bin/mpv --vo opengl $SNAP_COMMON/ $(find /media/ -maxdepth 1 -mindepth 1)
     daemon: simple
     restart-condition: always
     environment:
       PULSE_SYSTEM: 1
       PULSE_RUNTIME_PATH: /var/run/pulse
-
-  udisksd:
-        daemon: simple
-        command: usr/lib/udisks2/udisksd
-        plugs:
-            - hardware-observe
-            - mount-observe
 
 parts:
   mpv:
@@ -95,6 +88,3 @@ parts:
     source: https://github.com/MirServer/mir-kiosk-snap-launch.git
     override-build:  $SNAPCRAFT_PART_BUILD/build-with-plugs.sh opengl pulseaudio wayland
   
-  udisks2:
-    plugin: nil
-    stage-packages: [udisks2]
