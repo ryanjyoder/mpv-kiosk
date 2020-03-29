@@ -4,9 +4,9 @@ FLAG_FILE="$SNAP_COMMON/.automount_enabled"
 
 value=$(snapctl get automount.enable)
 if [ -z "$value" ]; then
-    # default to off
-    snapctl set automount.enable="false"
-    "$value"="false"
+    # default to on
+    snapctl set automount.enable="true"
+    "$value"="true"
 fi
 
 if [ "$value" = "true" ]; then
